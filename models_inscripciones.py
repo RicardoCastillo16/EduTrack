@@ -38,6 +38,11 @@ class Materia:
                 })
             return materias
 
+    @staticmethod
+    def listar_todas():
+        """Alias de listar() para compatibilidad"""
+        return Materia.listar()
+
 
 class Grupo:
     """Modelo para grupos con control de concurrencia"""

@@ -3,11 +3,23 @@
 -- Sistema de Inscripciones con Control de Concurrencia
 -- ================================================
 
--- Crear roles del sistema
-CREATE ROLE admin_role;
-CREATE ROLE coordinator_role;
-CREATE ROLE teacher_role;
-CREATE ROLE student_role;
+-- Crear roles del sistema (si no existen)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'admin_role') THEN
+        CREATE ROLE admin_role;
+    END IF;
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'coordinator_role') THEN
+        CREATE ROLE coordinator_role;
+    END IF;
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'teacher_role') THEN
+        CREATE ROLE teacher_role;
+    END IF;
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'student_role') THEN
+        CREATE ROLE student_role;
+    END IF;
+END
+$$;
 
 -- ================================================
 -- TABLA: usuarios (control de acceso)
@@ -182,17 +194,38 @@ GRANT SELECT ON materias, grupos, inscripciones, calificaciones TO student_role;
 -- ================================================
 -- LOGINS
 -- ================================================
-CREATE ROLE login_admin WITH LOGIN PASSWORD 'Admin123';
-CREATE ROLE login_coordinator WITH LOGIN PASSWORD 'Coord123';
-CREATE ROLE login_teacher WITH LOGIN PASSWORD 'Teacher123';
-CREATE ROLE login_student WITH LOGIN PASSWORD 'Student123';
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'login_admin') THEN
+        CREATE ROLE login_admin WITH LOGIN PASSWORD 'Admin123';
+    END IF;
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'login_coordinator') THEN
+        CREATE ROLE login_coordinator WITH LOGIN PASSWORD 'Coord123';
+    END IF;
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'login_teacher') THEN
+        CREATE ROLE login_teacher WITH LOGIN PASSWORD 'Teacher123';
+    END IF;
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'login_student') THEN
+        CREATE ROLE login_student WITH LOGIN PASSWORD 'Student123';
+    END IF;
+END
+$$;
 
-GRANT admin_role TO login_admin;
-GRANT coordinator_role TO login_coordinator;
-GRANT teacher_role TO login_teacher;
-GRANT student_role TO login_student;
+DO $$
+BEGIN
+    -- GRANT statements (these are idempotent, so safe to repeat)
+    GRANT admin_role TO login_admin;
+    GRANT coordinator_role TO login_coordinator;
+    GRANT teacher_role TO login_teacher;
+    GRANT student_role TO login_student;
+EXCEPTION
+    WHEN OTHERS THEN
+        NULL; -- Ignore errors if grants already exist
+END
+$$;
 
 -- Usuario admin por defecto (password: admin123)
 INSERT INTO usuarios (username, password_hash, nombre_completo, email, rol)
 VALUES ('admin', '$2b$12$aOfCg/aARMj7P1yFWYuMk.qfr.TEwFlX9E4fWbebhC0/SJ8d2sr5u', 
-        'Administrador', 'admin@edutrack.com', 'admin');
+        'Administrador', 'admin@edutrack.com', 'admin')
+ON CONFLICT (username) DO NOTHING;

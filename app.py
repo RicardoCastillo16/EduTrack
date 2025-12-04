@@ -202,6 +202,153 @@ def nueva_nota():
     return render_template('nueva_nota.html', grupos=grupos, alumnos=alumnos)
 
 # ================================================
+# RUTAS DE MATERIAS
+# ================================================
+@app.route('/materias')
+@login_required
+def materias():
+    materias_list = Materia.listar_todas()
+    return render_template('materias.html', materias=materias_list)
+
+@app.route('/materias/nueva', methods=['GET', 'POST'])
+@role_required('admin', 'coordinator')
+def nueva_materia():
+    if request.method == 'POST':
+        materia_id = Materia.crear(
+            nombre=request.form.get('nombre'),
+            descripcion=request.form.get('descripcion'),
+            creditos=int(request.form.get('creditos', 3))
+        )
+        flash('Materia creada exitosamente', 'success')
+        return redirect(url_for('materias'))
+
+    return render_template('nueva_materia.html')
+
+# ================================================
+# RUTAS DE ALUMNOS
+# ================================================
+@app.route('/alumnos')
+@login_required
+def alumnos():
+    with get_db_cursor(commit=False) as cursor:
+        cursor.execute("""
+            SELECT id, matricula, nombre, email, carrera, semestre, fecha_creacion
+            FROM alumnos ORDER BY nombre
+        """)
+        alumnos_list = []
+        for row in cursor.fetchall():
+            alumnos_list.append({
+                'id': row[0],
+                'matricula': row[1],
+                'nombre': row[2],
+                'email': row[3],
+                'carrera': row[4],
+                'semestre': row[5],
+                'fecha_creacion': row[6]
+            })
+
+    return render_template('alumnos.html', alumnos=alumnos_list)
+
+@app.route('/alumnos/nuevo', methods=['GET', 'POST'])
+@role_required('admin', 'coordinator')
+def nuevo_alumno():
+    if request.method == 'POST':
+        with get_db_cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO alumnos (matricula, nombre, email, carrera, semestre)
+                VALUES (%s, %s, %s, %s, %s) RETURNING id
+            """, (
+                request.form.get('matricula'),
+                request.form.get('nombre'),
+                request.form.get('email'),
+                request.form.get('carrera'),
+                int(request.form.get('semestre', 1))
+            ))
+
+        flash('Alumno creado exitosamente', 'success')
+        return redirect(url_for('alumnos'))
+
+    return render_template('nuevo_alumno.html')
+
+# ================================================
+# RUTAS DE USUARIOS
+# ================================================
+@app.route('/usuarios')
+@role_required('admin')
+def usuarios():
+    usuarios_list = Usuario.listar_todos()
+    return render_template('usuarios.html', usuarios=usuarios_list)
+
+@app.route('/usuarios/nuevo', methods=['GET', 'POST'])
+@role_required('admin')
+def nuevo_usuario():
+    if request.method == 'POST':
+        user_id = Usuario.crear_usuario(
+            username=request.form.get('username'),
+            password=request.form.get('password'),
+            nombre_completo=request.form.get('nombre_completo'),
+            email=request.form.get('email'),
+            rol=request.form.get('rol')
+        )
+        flash('Usuario creado exitosamente', 'success')
+        return redirect(url_for('usuarios'))
+
+    return render_template('nuevo_usuario.html')
+
+@app.route('/grupos/nuevo', methods=['GET', 'POST'])
+@role_required('admin', 'coordinator')
+def nuevo_grupo():
+    if request.method == 'POST':
+        grupo_id = Grupo.crear(
+            materia_id=int(request.form.get('materia_id')),
+            profesor_id=int(request.form.get('profesor_id')) if request.form.get('profesor_id') else None,
+            periodo=request.form.get('periodo'),
+            cupo_maximo=int(request.form.get('cupo_maximo'))
+        )
+        flash('Grupo creado exitosamente', 'success')
+        return redirect(url_for('grupos'))
+
+    # Obtener materias y profesores para el formulario
+    materias_list = Materia.listar_todas()
+    with get_db_cursor(commit=False) as cursor:
+        cursor.execute("SELECT id, nombre FROM profesores ORDER BY nombre")
+        profesores = [{'id': r[0], 'nombre': r[1]} for r in cursor.fetchall()]
+
+    return render_template('nuevo_grupo.html', materias=materias_list, profesores=profesores)
+
+# ================================================
+# RUTAS DE CALIFICACIONES
+# ================================================
+@app.route('/calificaciones')
+@login_required
+def calificaciones():
+    with get_db_cursor(commit=False) as cursor:
+        cursor.execute("""
+            SELECT c.id, a.nombre, a.matricula, m.nombre as materia, 
+                   c.parcial1, c.parcial2, c.final, c.fecha_modificacion
+            FROM calificaciones c
+            JOIN inscripciones i ON c.inscripcion_id = i.id
+            JOIN alumnos a ON i.alumno_id = a.id
+            JOIN grupos g ON i.grupo_id = g.id
+            JOIN materias m ON g.materia_id = m.id
+            ORDER BY a.nombre
+        """)
+        calificaciones_list = []
+        for row in cursor.fetchall():
+            calificaciones_list.append({
+                'id': row[0],
+                'alumno': row[1],
+                'matricula': row[2],
+                'materia': row[3],
+                'parcial1': row[4],
+                'parcial2': row[5],
+                'final': row[6],
+                'fecha_modificacion': row[7]
+            })
+
+    return render_template('calificaciones.html', calificaciones=calificaciones_list)
+
+# ================================================
 # INICIO
 # ================================================
 if __name__ == '__main__':

@@ -89,6 +89,11 @@ class Usuario:
                 })
             return usuarios
 
+    @staticmethod
+    def listar_todos():
+        """Alias de listar_usuarios() para compatibilidad"""
+        return Usuario.listar_usuarios()
+
 
 class Sesion:
     """Manejo de sesiones en MongoDB (clave-valor para acceso rápido)"""

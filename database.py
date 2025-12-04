@@ -117,3 +117,4 @@ def init_mongodb_indexes():
 # Inicializar al importar
 if mongo_db is not None:
     init_mongodb_indexes()
+
