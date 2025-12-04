@@ -8,24 +8,25 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="bi bi-book"></i> Nueva Materia</h4>
+                    <h4 class="mb-0"><i class="bi bi-book"></i> {% if editar %}Editar{% else %}Nueva{% endif %} Materia</h4>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ url_for('nueva_materia') }}">
+                    <form method="POST" action="{% if editar %}{{ url_for('editar_materia', id=materia.id) }}{% else %}{{ url_for('nueva_materia') }}{% endif %}">
                         <div class="mb-3">
                             <label for="nombre" class="form-label">Nombre *</label>
-                            <input type="text" class="form-control" id="nombre" name="nombre" required>
+                            <input type="text" class="form-control" id="nombre" name="nombre"
+                                   value="{{ materia.nombre if materia else '' }}" required>
                         </div>
 
                         <div class="mb-3">
                             <label for="descripcion" class="form-label">Descripción</label>
-                            <textarea class="form-control" id="descripcion" name="descripcion" rows="3"></textarea>
+                            <textarea class="form-control" id="descripcion" name="descripcion" rows="3">{{ materia.descripcion if materia else '' }}</textarea>
                         </div>
 
                         <div class="mb-3">
                             <label for="creditos" class="form-label">Créditos *</label>
                             <input type="number" class="form-control" id="creditos" name="creditos" 
-                                   min="1" max="10" value="3" required>
+                                   min="1" max="10" value="{{ materia.creditos if materia else 3 }}" required>
                         </div>
 
                         <div class="d-flex justify-content-between">
@@ -33,7 +34,7 @@
                                 <i class="bi bi-arrow-left"></i> Cancelar
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-circle"></i> Crear Materia
+                                <i class="bi bi-check-circle"></i> {% if editar %}Actualizar{% else %}Crear{% endif %} Materia
                             </button>
                         </div>
                     </form>

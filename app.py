@@ -224,6 +224,43 @@ def nueva_materia():
 
     return render_template('nueva_materia.html')
 
+@app.route('/materias/editar/<int:id>', methods=['GET', 'POST'])
+@role_required('admin', 'coordinator')
+def editar_materia(id):
+    if request.method == 'POST':
+        with get_db_cursor() as cursor:
+            cursor.execute("""
+                UPDATE materias 
+                SET nombre = %s, descripcion = %s, creditos = %s
+                WHERE id = %s
+            """, (
+                request.form.get('nombre'),
+                request.form.get('descripcion'),
+                int(request.form.get('creditos', 3)),
+                id
+            ))
+        flash('Materia actualizada exitosamente', 'success')
+        return redirect(url_for('materias'))
+
+    # GET - Obtener datos de la materia
+    with get_db_cursor(commit=False) as cursor:
+        cursor.execute("""
+            SELECT id, nombre, descripcion, creditos
+            FROM materias WHERE id = %s
+        """, (id,))
+        row = cursor.fetchone()
+        if row:
+            materia = {
+                'id': row[0],
+                'nombre': row[1],
+                'descripcion': row[2],
+                'creditos': row[3]
+            }
+            return render_template('nueva_materia.html', materia=materia, editar=True)
+        else:
+            flash('Materia no encontrada', 'danger')
+            return redirect(url_for('materias'))
+
 # ================================================
 # RUTAS DE ALUMNOS
 # ================================================
@@ -347,6 +384,56 @@ def calificaciones():
             })
 
     return render_template('calificaciones.html', calificaciones=calificaciones_list)
+
+@app.route('/calificaciones/editar/<int:id>', methods=['GET', 'POST'])
+@role_required('admin', 'coordinator', 'teacher')
+def editar_calificacion(id):
+    if request.method == 'POST':
+        with get_db_cursor() as cursor:
+            parcial1 = request.form.get('parcial1')
+            parcial2 = request.form.get('parcial2')
+            final = request.form.get('final')
+
+            cursor.execute("""
+                UPDATE calificaciones 
+                SET parcial1 = %s, parcial2 = %s, final = %s, fecha_modificacion = CURRENT_TIMESTAMP
+                WHERE inscripcion_id = %s
+            """, (
+                float(parcial1) if parcial1 else None,
+                float(parcial2) if parcial2 else None,
+                float(final) if final else None,
+                id
+            ))
+        flash('Calificación actualizada exitosamente', 'success')
+        return redirect(url_for('calificaciones'))
+
+    # GET - Obtener datos de la calificación
+    with get_db_cursor(commit=False) as cursor:
+        cursor.execute("""
+            SELECT c.inscripcion_id, a.nombre, a.matricula, m.nombre as materia,
+                   c.parcial1, c.parcial2, c.final
+            FROM calificaciones c
+            JOIN inscripciones i ON c.inscripcion_id = i.id
+            JOIN alumnos a ON i.alumno_id = a.id
+            JOIN grupos g ON i.grupo_id = g.id
+            JOIN materias m ON g.materia_id = m.id
+            WHERE c.inscripcion_id = %s
+        """, (id,))
+        row = cursor.fetchone()
+        if row:
+            calificacion = {
+                'inscripcion_id': row[0],
+                'alumno': row[1],
+                'matricula': row[2],
+                'materia': row[3],
+                'parcial1': row[4],
+                'parcial2': row[5],
+                'final': row[6]
+            }
+            return render_template('calificaciones.html', calificacion_editar=calificacion)
+        else:
+            flash('Calificación no encontrada', 'danger')
+            return redirect(url_for('calificaciones'))
 
 # ================================================
 # INICIO
