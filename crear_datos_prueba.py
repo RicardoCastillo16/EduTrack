@@ -12,7 +12,7 @@ from database import get_db_cursor
 def crear_datos_prueba():
     """Crear datos de prueba para el sistema"""
     
-    print("🔧 Creando datos de prueba...")
+    print(" Creando datos de prueba...")
     
     # 1. Crear usuarios adicionales
     print("\n1. Creando usuarios...")
@@ -24,7 +24,7 @@ def crear_datos_prueba():
             email="maria.garcia@edutrack.com",
             rol="coordinator"
         )
-        print("✓ Usuario coordinador creado")
+        print(" Usuario coordinador creado")
     except:
         print("ℹ Usuario coordinador ya existe")
     
@@ -38,7 +38,7 @@ def crear_datos_prueba():
         )
         print("✓ Usuario profesor creado")
     except:
-        print("ℹ Usuario profesor ya existe")
+        print(" Usuario profesor ya existe")
     
     try:
         Usuario.crear_usuario(
