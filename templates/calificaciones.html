@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Calificaciones - EduTrack{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4"><i class="bi bi-card-checklist"></i> Calificaciones</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Seleccionar Grupo</h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('calificaciones') }}">
+                        <div class="mb-3">
+                            <select class="form-select" name="grupo_id" onchange="this.form.submit()">
+                                <option value="">Seleccione un grupo...</option>
+                                {% for grupo in grupos %}
+                                <option value="{{ grupo.id }}" {% if grupo_id == grupo.id %}selected{% endif %}>
+                                    {{ grupo.materia }} - {{ grupo.periodo }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if calificaciones %}
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Calificaciones del Grupo</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Matrícula</th>
+                            <th>Alumno</th>
+                            <th>Parcial 1</th>
+                            <th>Parcial 2</th>
+                            <th>Final</th>
+                            <th>Promedio</th>
+                            {% if session.rol in ['admin', 'coordinator', 'teacher'] %}
+                            <th>Acciones</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cal in calificaciones %}
+                        <tr>
+                            <td><code>{{ cal.matricula }}</code></td>
+                            <td><strong>{{ cal.alumno }}</strong></td>
+                            <td>{{ cal.parcial1 or '-' }}</td>
+                            <td>{{ cal.parcial2 or '-' }}</td>
+                            <td>{{ cal.final or '-' }}</td>
+                            <td>
+                                {% if cal.promedio %}
+                                <span class="badge {% if cal.promedio >= 70 %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ "%.1f"|format(cal.promedio) }}
+                                </span>
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            {% if session.rol in ['admin', 'coordinator', 'teacher'] %}
+                            <td>
+                                <a href="{{ url_for('editar_calificacion', id=cal.inscripcion_id) }}"
+                                   class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Seleccione un grupo para ver las calificaciones.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
