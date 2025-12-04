@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Grupos - EduTrack{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-collection"></i> Grupos Disponibles</h1>
+        {% if session.rol in ['admin', 'coordinator'] %}
+        <a href="{{ url_for('nuevo_grupo') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nuevo Grupo
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Materia</th>
+                            <th>Profesor</th>
+                            <th>Periodo</th>
+                            <th>Cupo</th>
+                            <th>Disponibles</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for grupo in grupos %}
+                        <tr>
+                            <td><strong>{{ grupo.materia }}</strong></td>
+                            <td>{{ grupo.profesor or 'Sin asignar' }}</td>
+                            <td><code>{{ grupo.periodo }}</code></td>
+                            <td>{{ grupo.inscritos }}/{{ grupo.cupo_maximo }}</td>
+                            <td>
+                                <span class="badge {% if grupo.disponibles == 0 %}bg-danger{% elif grupo.disponibles <= 5 %}bg-warning{% else %}bg-success{% endif %}">
+                                    {{ grupo.disponibles }} lugares
+                                </span>
+                            </td>
+                            <td>
+                                {% if grupo.estado == 'lleno' %}
+                                <span class="badge bg-danger">Lleno</span>
+                                {% elif grupo.estado == 'casi_lleno' %}
+                                <span class="badge bg-warning">Casi Lleno</span>
+                                {% else %}
+                                <span class="badge bg-success">Disponible</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if session.rol in ['admin', 'coordinator'] and grupo.estado != 'lleno' %}
+                                <a href="{{ url_for('registrar_inscripcion') }}?grupo_id={{ grupo.id }}"
+                                   class="btn btn-sm btn-primary" title="Inscribir">
+                                    <i class="bi bi-person-plus"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No hay grupos registrados</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
