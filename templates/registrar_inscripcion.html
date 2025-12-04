@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Inscripción - EduTrack{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-person-plus"></i> Registrar Inscripción</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Control de Concurrencia:</strong> Este sistema implementa control de concurrencia
+                        para evitar sobre-inscripción cuando múltiples usuarios inscriben al mismo grupo simultáneamente.
+                    </div>
+
+                    <form method="POST" action="{{ url_for('registrar_inscripcion') }}" id="inscripcionForm">
+                        <div class="mb-3">
+                            <label for="alumno_id" class="form-label">Seleccione el Alumno *</label>
+                            <select class="form-select" id="alumno_id" name="alumno_id" required>
+                                <option value="">Seleccione un alumno...</option>
+                                {% for alumno in alumnos %}
+                                <option value="{{ alumno.id }}">
+                                    {{ alumno.matricula }} - {{ alumno.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="grupo_id" class="form-label">Seleccione el Grupo *</label>
+                            <select class="form-select" id="grupo_id" name="grupo_id" required>
+                                <option value="">Seleccione un grupo...</option>
+                                {% for grupo in grupos %}
+                                <option value="{{ grupo.id }}"
+                                        data-disponibles="{{ grupo.disponibles }}"
+                                        data-materia="{{ grupo.materia }}"
+                                        {% if grupo.estado == 'lleno' %}disabled{% endif %}>
+                                    {{ grupo.materia }} - {{ grupo.periodo }}
+                                    (Disponibles: {{ grupo.disponibles }})
+                                    {% if grupo.estado == 'lleno' %}[LLENO]{% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Cupos disponibles: <span id="cuposDisponibles">-</span></small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Método de Control de Concurrencia</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="metodo_concurrencia"
+                                       id="pesimista" value="pesimista" checked>
+                                <label class="form-check-label" for="pesimista">
+                                    <strong>Pesimista (FOR UPDATE)</strong> - Bloquea el grupo durante la inscripción
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="metodo_concurrencia"
+                                       id="optimista" value="optimista">
+                                <label class="form-check-label" for="optimista">
+                                    <strong>Optimista (Version)</strong> - Verifica conflictos al confirmar
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h5>Resumen de la Inscripción</h5>
+                                <p><strong>Alumno:</strong> <span id="resumenAlumno">-</span></p>
+                                <p><strong>Materia:</strong> <span id="resumenMateria">-</span></p>
+                                <p><strong>Cupos Disponibles:</strong> <span id="resumenCupos">-</span></p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('inscripciones') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Confirmar Inscripción
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const alumnoSelect = document.getElementById('alumno_id');
+    const grupoSelect = document.getElementById('grupo_id');
+    const cuposDisponibles = document.getElementById('cuposDisponibles');
+    const resumenAlumno = document.getElementById('resumenAlumno');
+    const resumenMateria = document.getElementById('resumenMateria');
+    const resumenCupos = document.getElementById('resumenCupos');
+
+    alumnoSelect.addEventListener('change', function() {
+        const option = this.options[this.selectedIndex];
+        resumenAlumno.textContent = option.text || '-';
+    });
+
+    grupoSelect.addEventListener('change', function() {
+        const option = this.options[this.selectedIndex];
+        if (option.value) {
+            const disponibles = option.dataset.disponibles;
+            const materia = option.dataset.materia;
+            cuposDisponibles.textContent = disponibles + ' lugares';
+            resumenMateria.textContent = materia;
+            resumenCupos.textContent = disponibles;
+        }
+    });
+});
+</script>
+{% endblock %}
