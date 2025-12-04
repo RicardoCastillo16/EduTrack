@@ -1,6 +1,6 @@
-# 🚀 Inicio Rápido - EduTrack
+# Inicio Rápido - EduTrack
 
-## ⚡ Instalación en 5 Minutos
+## Instalación en 5 Minutos
 
 ### 1. Pre-requisitos
 ```bash
@@ -38,7 +38,7 @@ python app.py
 python crear_datos_prueba.py
 ```
 
-## 🔑 Credenciales
+## Credenciales
 
 | Usuario | Contraseña | Rol |
 |---------|------------|-----|
@@ -47,7 +47,7 @@ python crear_datos_prueba.py
 | profesor1 | prof123 | Profesor |
 | alumno1 | alumno123 | Estudiante |
 
-## ✅ Checklist
+## Checklist
 
 - [ ] PostgreSQL corriendo
 - [ ] MongoDB corriendo
