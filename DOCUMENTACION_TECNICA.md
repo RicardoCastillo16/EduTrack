@@ -1,10 +1,10 @@
-# 📚 Documentación Técnica - EduTrack
+#  Documentación Técnica - EduTrack
 
-## 🎯 Resumen
+##  Resumen
 
 Sistema académico con PostgreSQL y MongoDB, implementando control de concurrencia.
 
-## ✅ Control de Concurrencia (4.1)
+## Control de Concurrencia (4.1)
 
 ### Optimista
 ```python
@@ -27,7 +27,7 @@ def inscribir_pesimista(grupo_id, alumno_id):
     """, (grupo_id,))
 ```
 
-## ✅ BD NoSQL - Documentos (4.2)
+## BD NoSQL - Documentos (4.2)
 
 ```python
 documento = {
@@ -40,7 +40,7 @@ documento = {
 }
 ```
 
-## ✅ BD NoSQL - Clave-Valor (4.3)
+## BD NoSQL - Clave-Valor (4.3)
 
 ```python
 sesion = {
@@ -50,7 +50,7 @@ sesion = {
 }
 ```
 
-## ✅ Roles y Privilegios (5.3)
+## Roles y Privilegios (5.3)
 
 | Rol | SELECT | INSERT | UPDATE | DELETE |
 |-----|--------|--------|--------|--------|
