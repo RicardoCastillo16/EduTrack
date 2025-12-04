@@ -2,7 +2,7 @@
 
 Sistema de gestión académica implementado con Flask, PostgreSQL y MongoDB.
 
-## 📋 Descripción
+## Descripción
 
 EduTrack gestiona:
 - **Inscripciones** con control de concurrencia (PostgreSQL)
@@ -10,7 +10,7 @@ EduTrack gestiona:
 - **Calificaciones** parciales y finales
 - **Gestión de Usuarios** con roles
 
-## 🛠️ Tecnologías
+## Tecnologías
 
 - **Backend**: Flask (Python)
 - **BD Relacional**: PostgreSQL
@@ -18,7 +18,7 @@ EduTrack gestiona:
 - **Frontend**: HTML5, Bootstrap 5
 - **Control de Concurrencia**: Optimista y Pesimista
 
-## 🚀 Inicio Rápido
+## Inicio Rápido
 
 ### Prerequisitos
 - Python 3.8+
@@ -58,7 +58,7 @@ python app.py
 - Usuario por defecto: `admin`
 - Contraseña: `admin123`
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 ```
 EduTrack/
 ├── app.py                    # Aplicación Flask principal
@@ -75,7 +75,7 @@ EduTrack/
 ```
 
 
-## 👤 Roles
+## Roles
 
 | Rol | Permisos |
 |-----|----------|
@@ -84,7 +84,7 @@ EduTrack/
 | teacher | Calificaciones, notas |
 | student | Consulta sus datos |
 
-## 🔄 Control de Concurrencia
+## Control de Concurrencia
 
 ### Optimista
 - Usa campo `version` en grupos
@@ -94,7 +94,7 @@ EduTrack/
 - Usa `SELECT FOR UPDATE`
 - Bloquea fila durante transacción
 
-## 📁 Estructura
+## Estructura
 
 ```
 edutrack/
