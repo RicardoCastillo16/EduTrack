@@ -18,40 +18,6 @@ EduTrack gestiona:
 - **Frontend**: HTML5, Bootstrap 5
 - **Control de Concurrencia**: Optimista y Pesimista
 
-## 📦 Instalación
-
-### 1. Requisitos
-- Python 3.8+
-- PostgreSQL 12+
-- MongoDB 4.4+
-
-### 2. Configurar Base de Datos
-```bash
-sudo -u postgres psql
-CREATE DATABASE edutrack;
-CREATE USER edutrack_admin WITH PASSWORD 'tu_contraseña';
-GRANT ALL PRIVILEGES ON DATABASE edutrack TO edutrack_admin;
-\q
-
-psql -U edutrack_admin -d edutrack -f schema_postgresql.sql
-```
-
-### 3. Instalar y Ejecutar
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python app.py
-```
-
-### 4. Acceder
-- URL: http://localhost:5000
-- Usuario: admin / admin123
-
-### 5. Datos de Prueba
-```bash
-python crear_datos_prueba.py
-```
 
 ## 👤 Roles
 
