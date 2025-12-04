@@ -359,31 +359,57 @@ def nuevo_grupo():
 @app.route('/calificaciones')
 @login_required
 def calificaciones():
-    with get_db_cursor(commit=False) as cursor:
-        cursor.execute("""
-            SELECT c.id, a.nombre, a.matricula, m.nombre as materia, 
-                   c.parcial1, c.parcial2, c.final, c.fecha_modificacion
-            FROM calificaciones c
-            JOIN inscripciones i ON c.inscripcion_id = i.id
-            JOIN alumnos a ON i.alumno_id = a.id
-            JOIN grupos g ON i.grupo_id = g.id
-            JOIN materias m ON g.materia_id = m.id
-            ORDER BY a.nombre
-        """)
-        calificaciones_list = []
-        for row in cursor.fetchall():
-            calificaciones_list.append({
-                'id': row[0],
-                'alumno': row[1],
-                'matricula': row[2],
-                'materia': row[3],
-                'parcial1': row[4],
-                'parcial2': row[5],
-                'final': row[6],
-                'fecha_modificacion': row[7]
-            })
+    # Obtener el grupo_id del query string si existe
+    grupo_id = request.args.get('grupo_id', type=int)
 
-    return render_template('calificaciones.html', calificaciones=calificaciones_list)
+    # Obtener lista de grupos para el selector
+    grupos = Grupo.listar_disponibles()
+
+    calificaciones_list = []
+
+    # Solo buscar calificaciones si se ha seleccionado un grupo
+    if grupo_id:
+        with get_db_cursor(commit=False) as cursor:
+            cursor.execute("""
+                SELECT c.inscripcion_id, a.nombre, a.matricula, m.nombre as materia, 
+                       c.parcial1, c.parcial2, c.final, c.fecha_modificacion
+                FROM calificaciones c
+                JOIN inscripciones i ON c.inscripcion_id = i.id
+                JOIN alumnos a ON i.alumno_id = a.id
+                JOIN grupos g ON i.grupo_id = g.id
+                JOIN materias m ON g.materia_id = m.id
+                WHERE g.id = %s
+                ORDER BY a.nombre
+            """, (grupo_id,))
+
+            for row in cursor.fetchall():
+                # Calcular promedio si hay calificaciones
+                parcial1 = row[4]
+                parcial2 = row[5]
+                final = row[6]
+                promedio = None
+
+                if parcial1 is not None and parcial2 is not None and final is not None:
+                    promedio = (parcial1 + parcial2 + final) / 3
+                elif parcial1 is not None and parcial2 is not None:
+                    promedio = (parcial1 + parcial2) / 2
+
+                calificaciones_list.append({
+                    'inscripcion_id': row[0],
+                    'alumno': row[1],
+                    'matricula': row[2],
+                    'materia': row[3],
+                    'parcial1': parcial1,
+                    'parcial2': parcial2,
+                    'final': final,
+                    'fecha_modificacion': row[7],
+                    'promedio': promedio
+                })
+
+    return render_template('calificaciones.html',
+                         calificaciones=calificaciones_list,
+                         grupos=grupos,
+                         grupo_id=grupo_id)
 
 @app.route('/calificaciones/editar/<int:id>', methods=['GET', 'POST'])
 @role_required('admin', 'coordinator', 'teacher')
