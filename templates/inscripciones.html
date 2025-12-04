@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Inscripciones - EduTrack{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-clipboard-check"></i> Historial de Inscripciones</h1>
+        {% if session.rol in ['admin', 'coordinator'] %}
+        <a href="{{ url_for('registrar_inscripcion') }}" class="btn btn-primary">
+            <i class="bi bi-person-plus"></i> Nueva Inscripción
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Matrícula</th>
+                            <th>Alumno</th>
+                            <th>Materia</th>
+                            <th>Periodo</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for insc in inscripciones %}
+                        <tr>
+                            <td>{{ insc.id }}</td>
+                            <td><code>{{ insc.matricula }}</code></td>
+                            <td><strong>{{ insc.alumno }}</strong></td>
+                            <td>{{ insc.materia }}</td>
+                            <td>{{ insc.periodo }}</td>
+                            <td>{{ insc.fecha.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                {% if insc.estado == 'activa' %}
+                                <span class="badge bg-success">Activa</span>
+                                {% elif insc.estado == 'baja' %}
+                                <span class="badge bg-danger">Baja</span>
+                                {% else %}
+                                <span class="badge bg-info">Completada</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No hay inscripciones registradas</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
