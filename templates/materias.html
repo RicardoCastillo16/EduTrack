@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Materias - EduTrack{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-book"></i> Catálogo de Materias</h1>
+        {% if session.rol in ['admin', 'coordinator'] %}
+        <a href="{{ url_for('nueva_materia') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nueva Materia
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Créditos</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for materia in materias %}
+                        <tr>
+                            <td>{{ materia.id }}</td>
+                            <td><strong>{{ materia.nombre }}</strong></td>
+                            <td>{{ materia.descripcion or '-' }}</td>
+                            <td><span class="badge bg-info">{{ materia.creditos }}</span></td>
+                            <td>
+                                {% if session.rol in ['admin', 'coordinator'] %}
+                                <a href="{{ url_for('editar_materia', id=materia.id) }}" 
+                                   class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No hay materias registradas</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
